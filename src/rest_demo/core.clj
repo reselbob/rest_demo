@@ -9,34 +9,36 @@
   (:gen-class))
 
 ; Simple Body Page
-(defn simple-body-page [req] ;(3)
+(defn simple-body-page [req]                                ;(3)
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    "Hello World"})
 ;
 ; request-example
 (defn request-example [req]
-     {:status  200
-      :headers {"Content-Type" "text/html"}
-      :body    (->
-                (pp/pprint req)
-                (str "Request Object: " req))})
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    (->
+              (pp/pprint req)
+              (str "Request Object: " req))})
 
 ; Hello-name handler
 (defn hello-name [req]
-     {:status  200
-      :headers {"Content-Type" "text/html"}
-      :body    (->
-                (pp/pprint req)
-                (str "Hello " (:name (:params req))))})
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    (->
+              (pp/pprint req)
+              (str "Hello " (:name (:params req))))})
 
 ; my people-collection mutable collection vector
 (def people-collection (atom []))
 
 ;Collection Helper functions to add a new person
 (defn addperson [firstname surname]
-  (swap! people-collection conj {:firstname (str/capitalize firstname)
-                                     :surname (str/capitalize surname)}))
+  ((if (and not ( str/blank? firstname)  not (str/blank? surname)))
+   (swap! people-collection conj {:firstname (str/capitalize firstname)
+                                  :surname   (str/capitalize surname)}))
+  )
 
 ; Example JSON objects
 (addperson "Functional" "Human")
@@ -44,28 +46,28 @@
 
 ; Return List of People
 (defn people-handler [req]
-        {:status  200
-         :headers {"Content-Type" "text/json"}
-         :body    (str (json/write-str @people-collection))})
+  {:status  200
+   :headers {"Content-Type" "text/json"}
+   :body    (str (json/write-str @people-collection))})
 
 ; Helper to get the parameter specified by pname from :params object in req
 (defn getparameter [req pname] (get (:params req) pname))
 
 ; Add a new person into the people-collection
 (defn addperson-handler [req]
-        {:status  200
-         :headers {"Content-Type" "text/json"}
-         :body    (-> (let [p (partial getparameter req)]
-                        (str (json/write-str (addperson (p :firstname) (p :surname))))))})
+  {:status  200
+   :headers {"Content-Type" "text/json"}
+   :body    (-> (let [p (partial getparameter req)]
+                  (str (json/write-str (addperson (p :firstname) (p :surname))))))})
 
 ; Our main routes
 (defroutes app-routes
-  (GET "/" [] simple-body-page)
-  (GET "/request" [] request-example)
-  (GET "/hello" [] hello-name)
-  (GET "/people" [] people-handler)
-  (GET "/people/add" [] addperson-handler)
-  (route/not-found "Error, page not found!"))
+           (GET "/" [] simple-body-page)
+           (GET "/request" [] request-example)
+           (GET "/hello" [] hello-name)
+           (GET "/people" [] people-handler)
+           (GET "/people/add" [] addperson-handler)
+           (route/not-found "Error, page not found!"))
 
 ; Our main entry function
 (defn -main
