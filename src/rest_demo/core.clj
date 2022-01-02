@@ -35,10 +35,8 @@
 
 ;Collection Helper functions to add a new person
 (defn addperson [firstname surname]
-  ((if (and not ( str/blank? firstname)  not (str/blank? surname)))
-   (swap! people-collection conj {:firstname (str/capitalize firstname)
-                                  :surname   (str/capitalize surname)}))
-  )
+  (swap! people-collection conj {:firstname (str/capitalize firstname)
+                                 :surname (str/capitalize surname)}))
 
 ; Example JSON objects
 (addperson "Functional" "Human")
